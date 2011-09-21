@@ -46,6 +46,8 @@ module HasGuardedHandlers
   def guarded?(guards, event)
     guards.find do |guard|
       case guard
+      when Class
+        !event.is_a? guard
       when Symbol
         !event.__send__ guard
       when Array
@@ -75,7 +77,7 @@ module HasGuardedHandlers
       case guard
       when Array
         guard.each { |g| check_guards [g] }
-      when Symbol, Proc, Hash, String
+      when Class, Symbol, Proc, Hash, String
         nil
       else
         raise "Bad guard: #{guard.inspect}"

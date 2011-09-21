@@ -50,6 +50,15 @@ describe TestObject do
   end
 
   describe 'guards' do
+    it 'can be a class' do
+      class GuardedObject; end
+      response.expects(:call).once
+      subject.register_handler(:event, GuardedObject) { |_| response.call }
+
+      subject.trigger_handler :event, GuardedObject.new
+      subject.trigger_handler :event, Object.new
+    end
+
     it 'can be a symbol' do
       response.expects(:call).once
       subject.register_handler(:event, :chat?) { |_| response.call }
