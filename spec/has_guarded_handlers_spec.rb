@@ -1,10 +1,7 @@
 require 'spec_helper'
 
 describe TestObject do
-  subject { TestObject.new :bar }
-
   it { should be_a TestObject }
-  its(:foo) { should == :bar }
 
   let(:event) { mock 'Event' }
   let(:response) { mock 'Response' }
