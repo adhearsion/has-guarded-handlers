@@ -12,4 +12,11 @@ end
 
 class TestObject
   include HasGuardedHandlers
+
+  attr_reader :foo
+
+  def initialize(foo)
+    @foo = foo
+    super
+  end
 end
