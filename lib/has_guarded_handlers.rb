@@ -1,9 +1,5 @@
-require "has-guarded-handlers/version"
+require "has_guarded_handlers/version"
 
-module Has
-  module Guarded
-    module Handlers
-      # Your code goes here...
-    end
-  end
+module HasGuardedHandlers
+  # Your code goes here...
 end
