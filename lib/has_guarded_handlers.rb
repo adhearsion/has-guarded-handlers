@@ -1,16 +1,13 @@
 require "has_guarded_handlers/version"
 
 module HasGuardedHandlers
-  def initialize(*args)
-    @handlers = {}
-  end
-
   # Register a handler
   #
   # @param [Symbol, nil] type set the filter on a specific handler
   # @param [guards] guards take a look at the guards documentation
   # @yield [Object] stanza the incoming event
   def register_handler(type, *guards, &handler)
+    initialize_guarded_handlers
     check_guards guards
     @handlers[type] ||= []
     @handlers[type] << [guards, handler]
@@ -21,10 +18,12 @@ module HasGuardedHandlers
   # @param [Symbol, nil] type remove filters for a specific handler
   # @param [guards] guards take a look at the guards documentation
   def clear_handlers(type, *guards)
+    initialize_guarded_handlers
     @handlers[type].delete_if { |g, _| g == guards }
   end
 
   def trigger_handler(type, event)
+    initialize_guarded_handlers
     return unless handler = @handlers[type]
     catch :halt do
       handler.find do |guards, handler|
@@ -82,5 +81,9 @@ module HasGuardedHandlers
         raise "Bad guard: #{guard.inspect}"
       end
     end
+  end
+
+  def initialize_guarded_handlers
+    @handlers ||= {}
   end
 end
