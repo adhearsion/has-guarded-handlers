@@ -39,6 +39,50 @@ describe TestObject do
     subject.trigger_handler :event, event
   end
 
+  describe 'when registering handlers with the same priority' do
+    it 'preserves the order of specification of the handlers' do
+      sequence = sequence 'handler_priority'
+      response.expects(:handle1).once.in_sequence sequence
+      response.expects(:handle2).once.in_sequence sequence
+      response.expects(:handle3).once.in_sequence sequence
+      subject.register_handler :event do |_|
+        response.handle1
+        throw :pass
+      end
+      subject.register_handler :event do |_|
+        response.handle2
+        throw :pass
+      end
+      subject.register_handler :event do |_|
+        response.handle3
+        throw :pass
+      end
+      subject.trigger_handler :event, event
+    end
+  end
+
+  describe 'when registering handlers with a specified priority' do
+    it 'executes handlers in that order' do
+      sequence = sequence 'handler_priority'
+      response.expects(:handle1).once.in_sequence sequence
+      response.expects(:handle2).once.in_sequence sequence
+      response.expects(:handle3).once.in_sequence sequence
+      subject.register_handler_with_priority :event, -10 do |_|
+        response.handle3
+        throw :pass
+      end
+      subject.register_handler_with_priority :event, 0 do |_|
+        response.handle2
+        throw :pass
+      end
+      subject.register_handler_with_priority :event, 10 do |_|
+        response.handle1
+        throw :pass
+      end
+      subject.trigger_handler :event, event
+    end
+  end
+
   it 'can clear handlers' do
     response.expects(:call).once
 

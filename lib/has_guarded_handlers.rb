@@ -7,10 +7,21 @@ module HasGuardedHandlers
   # @param [guards] guards take a look at the guards documentation
   # @yield [Object] stanza the incoming event
   def register_handler(type, *guards, &handler)
+    register_handler_with_priority type, 0, *guards, &handler
+  end
+
+  # Register a handler with a specified priority
+  #
+  # @param [Symbol, nil] type set the filter on a specific handler
+  # @param [Integer] priority the priority of the handler. Higher priority executes first
+  # @param [guards] guards take a look at the guards documentation
+  # @yield [Object] stanza the incoming event
+  def register_handler_with_priority(type, priority, *guards, &handler)
     initialize_guarded_handlers
     check_guards guards
-    @handlers[type] ||= []
-    @handlers[type] << [guards, handler]
+    @handlers[type] ||= {}
+    @handlers[type][priority] ||= []
+    @handlers[type][priority] << [guards, handler]
   end
 
   # Clear handlers with given guards
@@ -19,12 +30,14 @@ module HasGuardedHandlers
   # @param [guards] guards take a look at the guards documentation
   def clear_handlers(type, *guards)
     initialize_guarded_handlers
-    @handlers[type].delete_if { |g, _| g == guards }
+    @handlers[type].each_pair do |priority, handlers|
+      handlers.delete_if { |g, _| g == guards }
+    end
   end
 
   def trigger_handler(type, event)
     initialize_guarded_handlers
-    return unless handler = @handlers[type]
+    return unless handler = handlers_of_type(type)
     catch :halt do
       handler.find do |guards, handler|
         catch(:pass) { call_handler handler, guards, event }
@@ -33,6 +46,15 @@ module HasGuardedHandlers
   end
 
   private
+
+  def handlers_of_type(type)
+    hash = @handlers[type]
+    values = []
+    hash.keys.sort.reverse.each do |key|
+      values += hash[key]
+    end
+    values
+  end
 
   def call_handler(handler, guards, event)
     handler.call event unless guarded?(guards, event)
