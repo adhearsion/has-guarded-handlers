@@ -1,3 +1,6 @@
+# 0.1.1
+  * Bugfix: Fix an exception when triggering an event when no handlers are set
+
 # 0.1.0
   * Allow setting a priority with which to execute a handler, where higher priority handlers are exectuted first
 
