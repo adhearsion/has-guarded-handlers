@@ -13,6 +13,12 @@ describe TestObject do
     subject.trigger_handler :event, event
   end
 
+  it 'does not fail when no handlers are set' do
+    lambda do
+      subject.trigger_handler :event, event
+    end.should_not raise_error
+  end
+
   it 'allows for breaking out of handlers' do
     response.expects(:handle).once
     response.expects(:fail).never

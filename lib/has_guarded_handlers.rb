@@ -48,7 +48,7 @@ module HasGuardedHandlers
   private
 
   def handlers_of_type(type)
-    hash = @handlers[type]
+    return unless hash = @handlers[type]
     values = []
     hash.keys.sort.reverse.each do |key|
       values += hash[key]
