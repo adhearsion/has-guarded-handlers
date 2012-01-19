@@ -7,3 +7,4 @@ spec/reports
 .yardoc
 doc
 .*.swp
+vendor/ruby
