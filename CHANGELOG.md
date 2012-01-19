@@ -1,3 +1,9 @@
+# develop
+
+# 1.0.0 - 2012-01-19
+  * Bump to 1.0.0 because the API is stable
+  * Feature: Allow guarding with a module to test if an object has a mixin
+
 # 0.1.1
   * Bugfix: Fix an exception when triggering an event when no handlers are set
 
