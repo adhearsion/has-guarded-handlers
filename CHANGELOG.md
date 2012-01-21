@@ -1,5 +1,8 @@
 # develop
 
+# 1.1.0 - 2012-01-21
+  * Feature: Allow guarding on the value of method calls with arguments, by using an array as a hash key
+
 # 1.0.0 - 2012-01-19
   * Bump to 1.0.0 because the API is stable
   * Feature: Allow guarding with a module to test if an object has a mixin

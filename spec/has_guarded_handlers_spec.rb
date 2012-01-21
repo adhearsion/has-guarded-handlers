@@ -168,6 +168,15 @@ describe TestObject do
       subject.trigger_handler :event, event
     end
 
+    it 'can be a hash with arguments' do
+      response.expects(:call).once
+      subject.register_handler(:event, [:[], :foo] => :bar) { |_| response.call }
+
+      subject.trigger_handler :event, {:foo => :bar}
+      subject.trigger_handler :event, {:foo => :baz}
+      subject.trigger_handler :event, {}
+    end
+
     it 'can be a hash with an array' do
       response.expects(:call).twice
       subject.register_handler(:event, :type => [:result, :error]) { |_| response.call }
