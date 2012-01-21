@@ -78,7 +78,7 @@ module HasGuardedHandlers
       when Hash
         # return FALSE unless any inequality is found
         guard.find do |method, test|
-          value = event.__send__(method)
+          value = event.__send__(*method)
           # last_match is the only method found unique to Regexp classes
           if test.class.respond_to?(:last_match)
             !(test =~ value.to_s)
