@@ -1,4 +1,6 @@
 # develop
+
+# 1.2.0 - 2012-03-28
   * Feature: Allow registering temporary (single execution) handlers which are removed after they are triggered
   * Feature: Registering a handler returns an ID by which it may be unregistered
 
