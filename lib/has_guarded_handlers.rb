@@ -33,8 +33,8 @@ module HasGuardedHandlers
   #
   # @param [Symbol, nil] type set the filter on a specific handler
   # @param [Hash] options the options for the handler
-  # @option options [Integer] :priority the priority of the handler. Higher priority executes first
-  # @option options [true, false] :tmp Wether or not the handler should be considered temporary (single execution)
+  # @option options [Integer] :priority (0) the priority of the handler. Higher priority executes first
+  # @option options [true, false] :tmp (false) Wether or not the handler should be considered temporary (single execution)
   # @param [guards] guards take a look at the guards documentation
   # @yield [Object] stanza the incoming event
   def register_handler_with_options(type, options, *guards, &handler)
