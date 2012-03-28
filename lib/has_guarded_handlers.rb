@@ -7,7 +7,16 @@ module HasGuardedHandlers
   # @param [guards] guards take a look at the guards documentation
   # @yield [Object] stanza the incoming event
   def register_handler(type, *guards, &handler)
-    register_handler_with_priority type, 0, *guards, &handler
+    register_handler_with_options type, {}, *guards, &handler
+  end
+
+  # Register a temporary handler. Once triggered, the handler will be de-registered
+  #
+  # @param [Symbol, nil] type set the filter on a specific handler
+  # @param [guards] guards take a look at the guards documentation
+  # @yield [Object] stanza the incoming event
+  def register_tmp_handler(type, *guards, &handler)
+    register_handler_with_options type, {:tmp => true}, *guards, &handler
   end
 
   # Register a handler with a specified priority
@@ -17,8 +26,21 @@ module HasGuardedHandlers
   # @param [guards] guards take a look at the guards documentation
   # @yield [Object] stanza the incoming event
   def register_handler_with_priority(type, priority, *guards, &handler)
+    register_handler_with_options type, {:priority => priority}, *guards, &handler
+  end
+
+  # Register a handler with a specified set of options
+  #
+  # @param [Symbol, nil] type set the filter on a specific handler
+  # @param [Hash] options the options for the handler
+  # @option options [Integer] :priority the priority of the handler. Higher priority executes first
+  # @option options [true, false] :tmp Wether or not the handler should be considered temporary (single execution)
+  # @param [guards] guards take a look at the guards documentation
+  # @yield [Object] stanza the incoming event
+  def register_handler_with_options(type, options, *guards, &handler)
     check_guards guards
-    guarded_handlers[type][priority] << [guards, handler]
+    options[:priority] ||= 0
+    guarded_handlers[type][options[:priority]] << [guards, handler, options[:tmp]]
   end
 
   # Clear handlers with given guards
@@ -26,21 +48,26 @@ module HasGuardedHandlers
   # @param [Symbol, nil] type remove filters for a specific handler
   # @param [guards] guards take a look at the guards documentation
   def clear_handlers(type, *guards)
-    guarded_handlers[type].each_pair do |priority, handlers|
-      handlers.delete_if { |g, _| g == guards }
-    end
+    delete_handler_if(type) { |g, _| g == guards }
   end
 
   def trigger_handler(type, event)
     return unless handler = handlers_of_type(type)
     catch :halt do
-      handler.find do |guards, handler|
+      handler.find do |guards, handler, tmp|
         catch(:pass) { call_handler handler, guards, event }
+        delete_handler_if(type) { |_, h, _| h.equal? handler } if tmp
       end
     end
   end
 
   private
+
+  def delete_handler_if(type, &block)
+    guarded_handlers[type].each_pair do |priority, handlers|
+      handlers.delete_if(&block)
+    end
+  end
 
   def handlers_of_type(type)
     return unless hash = guarded_handlers[type]

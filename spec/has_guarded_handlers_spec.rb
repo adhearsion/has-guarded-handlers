@@ -17,6 +17,13 @@ describe HasGuardedHandlers do
     subject.trigger_handler :event, event
   end
 
+  it 'can register a one-shot (tmp) handler' do
+    response.expects(:call).once.with(event)
+    subject.register_tmp_handler(:event) { |e| response.call e }
+    subject.trigger_handler :event, event
+    subject.trigger_handler :event, event
+  end
+
   it 'does not fail when no handlers are set' do
     lambda do
       subject.trigger_handler :event, event
