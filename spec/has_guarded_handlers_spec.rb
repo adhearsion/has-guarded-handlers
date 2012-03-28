@@ -1,7 +1,11 @@
 require 'spec_helper'
 
-describe TestObject do
-  it { should be_a TestObject }
+describe HasGuardedHandlers do
+  subject do
+    Object.new.tap do |o|
+      o.extend HasGuardedHandlers
+    end
+  end
 
   let(:event) { mock 'Event' }
   let(:response) { mock 'Response' }
@@ -10,6 +14,21 @@ describe TestObject do
     response.expects(:call).twice.with(event)
     subject.register_handler(:event) { |e| response.call e }
     subject.trigger_handler :event, event
+    subject.trigger_handler :event, event
+  end
+
+  it 'can register a one-shot (tmp) handler' do
+    response.expects(:call).once.with(event)
+    subject.register_tmp_handler(:event) { |e| response.call e }
+    subject.trigger_handler :event, event
+    subject.trigger_handler :event, event
+  end
+
+  it 'can unregister a handler after registration' do
+    response.expects(:call).once.with(event)
+    subject.register_handler(:event) { |e| response.call e }
+    id = subject.register_handler(:event) { |e| response.call :foo }
+    subject.unregister_handler :event, id
     subject.trigger_handler :event, event
   end
 

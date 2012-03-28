@@ -18,11 +18,13 @@ Gem::Specification.new do |s|
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
 
-  s.add_development_dependency 'bundler', ["~> 1.0.0"]
+  s.add_dependency 'uuid'
+
+  s.add_development_dependency 'bundler', ["~> 1.0"]
   s.add_development_dependency 'rspec', [">= 2.5.0"]
   s.add_development_dependency 'mocha', [">= 0"]
   s.add_development_dependency 'ci_reporter', [">= 1.6.3"]
-  s.add_development_dependency 'yard', ["~> 0.7.0"]
+  s.add_development_dependency 'yard', [">= 0.7.0"]
   s.add_development_dependency 'rake', [">= 0"]
   s.add_development_dependency 'guard-rspec'
 end
