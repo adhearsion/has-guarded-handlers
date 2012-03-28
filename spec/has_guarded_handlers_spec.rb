@@ -1,7 +1,11 @@
 require 'spec_helper'
 
-describe TestObject do
-  it { should be_a TestObject }
+describe HasGuardedHandlers do
+  subject do
+    Object.new.tap do |o|
+      o.extend HasGuardedHandlers
+    end
+  end
 
   let(:event) { mock 'Event' }
   let(:response) { mock 'Response' }
