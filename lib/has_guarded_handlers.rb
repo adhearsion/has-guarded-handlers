@@ -77,7 +77,7 @@ module HasGuardedHandlers
   # Trigger a handler classification with an event object
   #
   # @param [Symbol, nil] type a classification to separate handlers/events into channels
-  # @param [Object] event an event object to pass to the handler block
+  # @param [Object] the event object to yield to the handler block
   def trigger_handler(type, event)
     return unless handler = handlers_of_type(type)
     catch :halt do
