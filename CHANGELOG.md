@@ -1,13 +1,13 @@
-# develop
+# [develop](https://github.com/adhearsion/has-guarded-handlers)
 
-# 1.2.0 - 2012-03-28
+# [1.2.0](https://github.com/adhearsion/has-guarded-handlers/compare/v1.1.0...v1.2.0) - [2012-03-28](https://rubygems.org/gems/has-guarded-handlers/versions/1.2.0)
   * Feature: Allow registering temporary (single execution) handlers which are removed after they are triggered
   * Feature: Registering a handler returns an ID by which it may be unregistered
 
-# 1.1.0 - 2012-01-21
+# [1.1.0](https://github.com/adhearsion/has-guarded-handlers/compare/v1.0.0...v1.1.0) - [2012-01-21](https://rubygems.org/gems/has-guarded-handlers/versions/1.1.0)
   * Feature: Allow guarding on the value of method calls with arguments, by using an array as a hash key
 
-# 1.0.0 - 2012-01-19
+# [1.0.0](https://github.com/adhearsion/has-guarded-handlers/compare/v0.0.1...v1.0.0) - [2012-01-19](https://rubygems.org/gems/has-guarded-handlers/versions/1.0.0)
   * Bump to 1.0.0 because the API is stable
   * Feature: Allow guarding with a module to test if an object has a mixin
 
