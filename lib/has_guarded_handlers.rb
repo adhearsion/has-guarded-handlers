@@ -1,46 +1,69 @@
 require "has_guarded_handlers/version"
+require 'uuid'
 
 module HasGuardedHandlers
   # Register a handler
   #
-  # @param [Symbol, nil] type set the filter on a specific handler
+  # @param [Symbol, nil] type a classification to separate handlers/events into channels
   # @param [guards] guards take a look at the guards documentation
-  # @yield [Object] stanza the incoming event
+  #
+  # @yield [Object] trigger_object the incoming event
+  #
+  # @return [String] handler ID for later manipulation
   def register_handler(type, *guards, &handler)
     register_handler_with_options type, {}, *guards, &handler
   end
 
   # Register a temporary handler. Once triggered, the handler will be de-registered
   #
-  # @param [Symbol, nil] type set the filter on a specific handler
+  # @param [Symbol, nil] type a classification to separate handlers/events into channels
   # @param [guards] guards take a look at the guards documentation
-  # @yield [Object] stanza the incoming event
+  #
+  # @yield [Object] trigger_object the incoming event
+  #
+  # @return [String] handler ID for later manipulation
   def register_tmp_handler(type, *guards, &handler)
     register_handler_with_options type, {:tmp => true}, *guards, &handler
   end
 
   # Register a handler with a specified priority
   #
-  # @param [Symbol, nil] type set the filter on a specific handler
+  # @param [Symbol, nil] type a classification to separate handlers/events into channels
   # @param [Integer] priority the priority of the handler. Higher priority executes first
   # @param [guards] guards take a look at the guards documentation
-  # @yield [Object] stanza the incoming event
+  #
+  # @yield [Object] trigger_object the incoming event
+  #
+  # @return [String] handler ID for later manipulation
   def register_handler_with_priority(type, priority, *guards, &handler)
     register_handler_with_options type, {:priority => priority}, *guards, &handler
   end
 
   # Register a handler with a specified set of options
   #
-  # @param [Symbol, nil] type set the filter on a specific handler
+  # @param [Symbol, nil] type a classification to separate handlers/events into channels
   # @param [Hash] options the options for the handler
   # @option options [Integer] :priority (0) the priority of the handler. Higher priority executes first
   # @option options [true, false] :tmp (false) Wether or not the handler should be considered temporary (single execution)
   # @param [guards] guards take a look at the guards documentation
-  # @yield [Object] stanza the incoming event
+  #
+  # @yield [Object] trigger_object the incoming event
+  #
+  # @return [String] handler ID for later manipulation
   def register_handler_with_options(type, options, *guards, &handler)
     check_guards guards
     options[:priority] ||= 0
-    guarded_handlers[type][options[:priority]] << [guards, handler, options[:tmp]]
+    new_handler_id.tap do |handler_id|
+      guarded_handlers[type][options[:priority]] << [guards, handler, options[:tmp], handler_id]
+    end
+  end
+
+  # Unregister a handler by ID
+  #
+  # @param [Symbol] type the handler classification used at registration
+  # @param [String] handler_id the handler ID returned by registration
+  def unregister_handler(type, handler_id)
+    delete_handler_if(type) { |_, _, _, id| id == handler_id }
   end
 
   # Clear handlers with given guards
@@ -51,6 +74,10 @@ module HasGuardedHandlers
     delete_handler_if(type) { |g, _| g == guards }
   end
 
+  # Trigger a handler classification with an event object
+  #
+  # @param [Symbol, nil] type a classification to separate handlers/events into channels
+  # @param [Object] event an event object to pass to the handler block
   def trigger_handler(type, event)
     return unless handler = handlers_of_type(type)
     catch :halt do
@@ -63,13 +90,13 @@ module HasGuardedHandlers
 
   private
 
-  def delete_handler_if(type, &block)
+  def delete_handler_if(type, &block) # :nodoc:
     guarded_handlers[type].each_pair do |priority, handlers|
       handlers.delete_if(&block)
     end
   end
 
-  def handlers_of_type(type)
+  def handlers_of_type(type) # :nodoc:
     return unless hash = guarded_handlers[type]
     values = []
     hash.keys.sort.reverse.each do |key|
@@ -78,8 +105,12 @@ module HasGuardedHandlers
     values
   end
 
-  def call_handler(handler, guards, event)
+  def call_handler(handler, guards, event) # :nodoc:
     handler.call event unless guarded?(guards, event)
+  end
+
+  def new_handler_id # :nodoc:
+    UUID.new.generate.to_s
   end
 
   # If any of the guards returns FALSE this returns true
@@ -87,7 +118,7 @@ module HasGuardedHandlers
   # (why would anyone want to loop over more values than necessary?)
   #
   # @private
-  def guarded?(guards, event)
+  def guarded?(guards, event) # :nodoc:
     guards.find do |guard|
       case guard
       when Class, Module
@@ -116,7 +147,7 @@ module HasGuardedHandlers
     end
   end
 
-  def check_guards(guards)
+  def check_guards(guards) # :nodoc:
     guards.each do |guard|
       case guard
       when Array
@@ -129,7 +160,7 @@ module HasGuardedHandlers
     end
   end
 
-  def guarded_handlers
+  def guarded_handlers # :nodoc:
     @handlers ||= Hash.new { |h, k| h[k] = Hash.new { |h, k| h[k] = [] } }
   end
 end

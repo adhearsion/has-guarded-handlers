@@ -24,6 +24,14 @@ describe HasGuardedHandlers do
     subject.trigger_handler :event, event
   end
 
+  it 'can unregister a handler after registration' do
+    response.expects(:call).once.with(event)
+    subject.register_handler(:event) { |e| response.call e }
+    id = subject.register_handler(:event) { |e| response.call :foo }
+    subject.unregister_handler :event, id
+    subject.trigger_handler :event, event
+  end
+
   it 'does not fail when no handlers are set' do
     lambda do
       subject.trigger_handler :event, event

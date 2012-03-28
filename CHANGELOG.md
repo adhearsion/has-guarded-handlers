@@ -1,5 +1,6 @@
 # develop
   * Feature: Allow registering temporary (single execution) handlers which are removed after they are triggered
+  * Feature: Registering a handler returns an ID by which it may be unregistered
 
 # 1.1.0 - 2012-01-21
   * Feature: Allow guarding on the value of method calls with arguments, by using an array as a hash key
