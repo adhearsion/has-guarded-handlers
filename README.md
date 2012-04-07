@@ -11,23 +11,148 @@ require 'has_guarded_handlers'
 
 class A
   include HasGuardedHandlers
-
-  def receive_event(event)
-    trigger_handler :event, event
-  end
 end
 
 a = A.new
-a.register_handler :event, :type => :foo do
-  puts "Handled the event"
+a.register_handler :event, :type => :foo do |event|
+  puts "Handled the event of type #{event.type} with value #{event.value}"
 end
 
-class Event
-  attr_accessor :type
-end
+Event = Class.new Struct.new(:type, :value)
 
-event = Event.new.tap { |e| e.type = :foo }
-a.receive_event event
+a.trigger_handler :event, Event.new(:foo, 'bar')
+```
+
+Register a handler for a particular named channel:
+
+```ruby
+a.register_handler(:event) { ... }
+# or
+a.register_handler(:event, :type => :foo) { ... }
+
+a.trigger_handler :event, :foo
+```
+
+Register a global handler for all channels:
+
+```ruby
+a.register_handler { ... }
+# or
+a.register_handler(nil, :type => :foo) { ... }
+
+a.trigger_handler :event, :foo
+```
+
+Register a temporary handler, which is deleted once triggered:
+
+```ruby
+a.register_tmp_handler(:event) { ... } # This will only fire once
+a.trigger_handler :event, :foo
+```
+
+Handlers are triggered in order of priority, followed by order of declaration. By default, all handlers are registered with priority 0, and are thus executed in the order declared:
+
+```ruby
+a.register_handler { ... } # This is triggered first
+a.register_handler { ... } # This is triggered second
+...
+
+a.trigger_handler :event, :foo
+```
+
+You may specify a handler priority in order to change this order. Higher priority is executed first:
+
+```ruby
+a.register_handler(:event) { ... } # This is triggered second
+a.register_handler_with_priority(:event, 10) { ... } # This is triggered first
+...
+
+a.trigger_handler :event, :foo
+```
+
+You may specify a priority for a temporary handler:
+
+```ruby
+a.register_handler_with_options(:event, {:tmp => true, :priority => 10}, :foo => :bar) { ... }
+```
+
+### Handler chaining
+
+When multiple handlers match the event, the return value of each handler will determine if the handler chain continues. A truthy return value will cause the handler to swallow the event and halt the handler chain. A falsy return value will continue the chain.
+
+It is possible to explicitly pass to the next handler by throwing `:pass` in your handler:
+
+```ruby
+a.register_handler(:event) { throw :pass }
+a.register_handler(:event) { ... } # This will be executed
+
+a.trigger_handler :event, :foo
+```
+
+or indeed explicitly halt the handler chain by throwing `:halt` in the handler:
+
+```ruby
+a.register_handler(:event) { throw :halt }
+a.register_handler(:event) { ... } # This will not be executed
+
+a.trigger_handler :event, :foo
+```
+
+### What are guards?
+
+Guards are a concept borrowed from Erlang. They help to better compartmentalise handlers.
+
+There are a number of guard types and one bit of special syntax. Guards act like AND statements. Each condition must be met if the handler is to be used.
+
+```ruby
+# Equivalent to saying (stanza.chat? && stanza.body)
+message :chat?, :body
+```
+
+The different types of guards are:
+
+```ruby
+# Class / Module
+#   Checks that the event is of the type specified
+#   Equivalent to event.is_a? Foo
+register_handler Foo
+
+# Symbol
+#   Checks for a non-false reply to calling the symbol on the event
+#   Equivalent to event.chat?
+register_handler :chat?
+
+# Hash with any value (:body => 'exit')
+#   Calls the key on the event and checks for equality
+#   Equivalent to event.body == 'exit'
+register_handler :body => 'exit'
+
+# Hash with regular expression (:body => /exit/)
+#   Calls the key on the event and checks for a match
+#   Equivalent to event.body.match /exit/
+register_handler :body => /exit/
+
+# Hash with array value (:name => [:gone, :forbidden])
+#   Calls the key on the event and check for inclusion in the array
+#   Equivalent to [:gone, :forbidden].include?(event.name)
+register_handler :name => [:gone, :fobidden]
+
+# Hash with array key ([:[], :name] => :gone)
+#   Calls the first element of the key on the event, passing the other elements as arguments
+#   and checks the value matches
+#   Equivalent to event[:name] == :gone
+register_handler [:[], :name] => :gone
+
+# Proc
+#   Calls the proc passing in the event
+#   Checks that the ID is modulo 3
+register_handler proc { |m| m.id % 3 == 0 }
+
+# Array
+#   Use arrays with the previous types effectively turns the guard into
+#   an OR statement.
+#   Equivalent to event.body == 'foo' || event.body == 'baz'
+register_handler [{:body => 'foo'}, {:body => 'baz'}]
 ```
 
 ## Links:
@@ -46,4 +171,4 @@ a.receive_event event
 
 ## Copyright
 
-Copyright (c) 2011 Ben Langfeld, Jeff Smick. MIT licence (see LICENSE for details).
+Copyright (c) 2011 Ben Langfeld, Jeff Smick. MIT licence (see LICENSE.md for details).
