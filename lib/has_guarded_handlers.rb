@@ -62,7 +62,7 @@ module HasGuardedHandlers
   #
   # @param [Symbol] type the handler classification used at registration
   # @param [String] handler_id the handler ID returned by registration
-  def unregister_handler(type = nil, handler_id)
+  def unregister_handler(type, handler_id)
     delete_handler_if(type) { |_, _, _, id| id == handler_id }
   end
 
