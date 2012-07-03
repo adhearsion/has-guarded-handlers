@@ -4,44 +4,44 @@ require 'uuid'
 module HasGuardedHandlers
   # Register a handler
   #
-  # @param [Symbol, nil] type a classification to separate handlers/events into channels
+  # @param [Symbol, nil] type a classification to separate handlers/events into channels. Omitting the classification will create a handler for all events.
   # @param [guards] guards take a look at the guards documentation
   #
   # @yield [Object] trigger_object the incoming event
   #
   # @return [String] handler ID for later manipulation
-  def register_handler(type, *guards, &handler)
+  def register_handler(type = nil, *guards, &handler)
     register_handler_with_options type, {}, *guards, &handler
   end
 
   # Register a temporary handler. Once triggered, the handler will be de-registered
   #
-  # @param [Symbol, nil] type a classification to separate handlers/events into channels
+  # @param [Symbol, nil] type a classification to separate handlers/events into channels Omitting the classification will create a handler for all events.
   # @param [guards] guards take a look at the guards documentation
   #
   # @yield [Object] trigger_object the incoming event
   #
   # @return [String] handler ID for later manipulation
-  def register_tmp_handler(type, *guards, &handler)
+  def register_tmp_handler(type = nil, *guards, &handler)
     register_handler_with_options type, {:tmp => true}, *guards, &handler
   end
 
   # Register a handler with a specified priority
   #
-  # @param [Symbol, nil] type a classification to separate handlers/events into channels
+  # @param [Symbol, nil] type a classification to separate handlers/events into channels Omitting the classification will create a handler for all events.
   # @param [Integer] priority the priority of the handler. Higher priority executes first
   # @param [guards] guards take a look at the guards documentation
   #
   # @yield [Object] trigger_object the incoming event
   #
   # @return [String] handler ID for later manipulation
-  def register_handler_with_priority(type, priority, *guards, &handler)
+  def register_handler_with_priority(type = nil, priority = 0, *guards, &handler)
     register_handler_with_options type, {:priority => priority}, *guards, &handler
   end
 
   # Register a handler with a specified set of options
   #
-  # @param [Symbol, nil] type a classification to separate handlers/events into channels
+  # @param [Symbol, nil] type a classification to separate handlers/events into channels Omitting the classification will create a handler for all events.
   # @param [Hash] options the options for the handler
   # @option options [Integer] :priority (0) the priority of the handler. Higher priority executes first
   # @option options [true, false] :tmp (false) Wether or not the handler should be considered temporary (single execution)
@@ -50,7 +50,7 @@ module HasGuardedHandlers
   # @yield [Object] trigger_object the incoming event
   #
   # @return [String] handler ID for later manipulation
-  def register_handler_with_options(type, options, *guards, &handler)
+  def register_handler_with_options(type = nil, options = {}, *guards, &handler)
     check_guards guards
     options[:priority] ||= 0
     new_handler_id.tap do |handler_id|
@@ -70,7 +70,7 @@ module HasGuardedHandlers
   #
   # @param [Symbol, nil] type remove filters for a specific handler
   # @param [guards] guards take a look at the guards documentation
-  def clear_handlers(type, *guards)
+  def clear_handlers(type = nil, *guards)
     delete_handler_if(type) { |g, _| g == guards }
   end
 
@@ -82,8 +82,8 @@ module HasGuardedHandlers
     return unless handler = handlers_of_type(type)
     catch :halt do
       handler.find do |guards, handler, tmp|
-        catch(:pass) { call_handler handler, guards, event }
-        delete_handler_if(type) { |_, h, _| h.equal? handler } if tmp
+        val = catch(:pass) { call_handler handler, guards, event }
+        delete_handler_if(type) { |_, h, _| h.equal? handler } if tmp && val
       end
     end
   end
@@ -101,6 +101,10 @@ module HasGuardedHandlers
     values = []
     hash.keys.sort.reverse.each do |key|
       values += hash[key]
+    end
+    global_handlers = guarded_handlers[nil]
+    global_handlers.keys.sort.reverse.each do |key|
+      values += global_handlers[key]
     end
     values
   end

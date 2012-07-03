@@ -17,10 +17,23 @@ describe HasGuardedHandlers do
     subject.trigger_handler :event, event
   end
 
+  it 'can register a handler for all events, regardless of category' do
+    response.expects(:call).twice.with(event)
+    subject.register_handler { |e| response.call e }
+    subject.trigger_handler :event, event
+    subject.trigger_handler :bah, event
+  end
+
   it 'can register a one-shot (tmp) handler' do
     response.expects(:call).once.with(event)
-    subject.register_tmp_handler(:event) { |e| response.call e }
-    subject.trigger_handler :event, event
+    event.expects(:foo).once.returns :bar
+
+    nomatch_event = mock 'Event(nomatch)'
+    nomatch_event.expects(:foo).once.returns :baz
+
+    subject.register_tmp_handler(:event, :foo => :bar) { |e| response.call e }
+
+    subject.trigger_handler :event, nomatch_event
     subject.trigger_handler :event, event
   end
 
