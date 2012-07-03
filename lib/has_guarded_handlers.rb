@@ -82,8 +82,8 @@ module HasGuardedHandlers
     return unless handler = handlers_of_type(type)
     catch :halt do
       handler.find do |guards, handler, tmp|
-        catch(:pass) { call_handler handler, guards, event }
-        delete_handler_if(type) { |_, h, _| h.equal? handler } if tmp
+        val = catch(:pass) { call_handler handler, guards, event }
+        delete_handler_if(type) { |_, h, _| h.equal? handler } if tmp && val
       end
     end
   end

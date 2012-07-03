@@ -1,5 +1,7 @@
 # [develop](https://github.com/adhearsion/has-guarded-handlers)
   * Feature: It is now possible to register a handler to process all events
+  * Bugfix: Temporary handlers were being removed after the first event even if their guards didn't match
+  * Bugfix: Fix for a syntax error on Ruby 1.8
 
 # [1.2.0](https://github.com/adhearsion/has-guarded-handlers/compare/v1.1.0...v1.2.0) - [2012-03-28](https://rubygems.org/gems/has-guarded-handlers/versions/1.2.0)
   * Feature: Allow registering temporary (single execution) handlers which are removed after they are triggered
