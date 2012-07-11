@@ -1,5 +1,5 @@
 require "has_guarded_handlers/version"
-require 'uuid'
+require 'securerandom'
 
 module HasGuardedHandlers
   # Register a handler
@@ -114,7 +114,7 @@ module HasGuardedHandlers
   end
 
   def new_handler_id # :nodoc:
-    UUID.new.generate.to_s
+    SecureRandom.uuid
   end
 
   # If any of the guards returns FALSE this returns true
