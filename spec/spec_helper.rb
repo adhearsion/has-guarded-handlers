@@ -1,6 +1,5 @@
 require 'rubygems'
 require 'has_guarded_handlers'
-require 'mocha'
 
 Dir[File.dirname(__FILE__) + "/support/**/*.rb"].each {|f| require f}
 
