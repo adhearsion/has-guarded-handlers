@@ -1,5 +1,8 @@
 # [develop](https://github.com/adhearsion/has-guarded-handlers)
 
+# [1.3.1](https://github.com/adhearsion/has-guarded-handlers/compare/v1.3.0...v1.3.1) - [2012-07-19](https://rubygems.org/gems/has-guarded-handlers/versions/1.3.1)
+  * Removed dependency on uuid gem in favour of the Ruby built-in `SecureRandom.uuid`
+
 # [1.3.0](https://github.com/adhearsion/has-guarded-handlers/compare/v1.2.0...v1.3.0) - [2012-07-03](https://rubygems.org/gems/has-guarded-handlers/versions/1.3.0)
   * Feature: It is now possible to register a handler to process all events
   * Bugfix: Temporary handlers were being removed after the first event even if their guards didn't match
