@@ -68,6 +68,20 @@ describe HasGuardedHandlers do
     subject.trigger_handler(:event, event).should be_true
   end
 
+  context 'when multiple handlers are registered' do
+    it "stops at the first matching handler regardless of return value" do
+      response.expects(:handle).once
+      subject.register_handler :event do |_|
+        response.handle
+        false
+      end
+      subject.register_handler :event do |_|
+        response.handle
+      end
+      subject.trigger_handler(:event, event).should be_true
+    end
+  end
+
   it 'allows for passing to the next handler of the same type' do
     response.expects(:handle1).once
     response.expects(:handle2).once
