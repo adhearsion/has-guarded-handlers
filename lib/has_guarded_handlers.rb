@@ -88,7 +88,7 @@ module HasGuardedHandlers
           if guarded?(guards, event)
             called = false
           else
-            handler.call event
+            call_handler handler, event
             true
           end
         end
@@ -100,6 +100,10 @@ module HasGuardedHandlers
   end
 
   private
+
+  def call_handler(handler, event)
+    handler.call event
+  end
 
   def delete_handler_if(type, &block) # :nodoc:
     guarded_handlers[type].each_pair do |priority, handlers|
