@@ -1,4 +1,5 @@
 # [develop](https://github.com/adhearsion/has-guarded-handlers)
+  * Bugfix: Report handler execution correctly in edge cases
 
 # [1.4.0](https://github.com/adhearsion/has-guarded-handlers/compare/v1.3.1...v1.4.0) - [2012-12-08](https://rubygems.org/gems/has-guarded-handlers/versions/1.4.0)
   * Feature: Return true/false from #trigger_handler depending on wether a handler was called or not
