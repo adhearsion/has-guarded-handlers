@@ -84,6 +84,7 @@ module HasGuardedHandlers
       handler.find do |guards, handler, tmp|
         val = catch(:pass) { call_handler handler, guards, event }
         delete_handler_if(type) { |_, h, _| h.equal? handler } if tmp && val
+        val
       end
     end
   end
@@ -110,7 +111,9 @@ module HasGuardedHandlers
   end
 
   def call_handler(handler, guards, event) # :nodoc:
-    handler.call event unless guarded?(guards, event)
+    return if guarded?(guards, event)
+    handler.call event
+    true
   end
 
   def new_handler_id # :nodoc:
