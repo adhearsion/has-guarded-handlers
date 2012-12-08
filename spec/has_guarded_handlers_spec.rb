@@ -13,8 +13,8 @@ describe HasGuardedHandlers do
   it 'can register a handler' do
     response.expects(:call).twice.with(event)
     subject.register_handler(:event) { |e| response.call e }
-    subject.trigger_handler :event, event
-    subject.trigger_handler :event, event
+    subject.trigger_handler(:event, event).should be_true
+    subject.trigger_handler(:event, event).should be_true
   end
 
   it 'can register a handler for all events, regardless of category' do
@@ -49,6 +49,7 @@ describe HasGuardedHandlers do
     lambda do
       subject.trigger_handler :event, event
     end.should_not raise_error
+    subject.trigger_handler(:event, event).should be_false
   end
 
   it 'allows for breaking out of handlers' do
