@@ -80,13 +80,23 @@ module HasGuardedHandlers
   # @param [Object] the event object to yield to the handler block
   def trigger_handler(type, event)
     return unless handler = handlers_of_type(type)
+    called = false
     catch :halt do
-      handler.find do |guards, handler, tmp|
-        val = catch(:pass) { call_handler handler, guards, event }
+      h = handler.find do |guards, handler, tmp|
+        called = true
+        val = catch(:pass) do
+          if guarded?(guards, event)
+            called = false
+          else
+            handler.call event
+            true
+          end
+        end
         delete_handler_if(type) { |_, h, _| h.equal? handler } if tmp && val
         val
       end
     end
+    !!called
   end
 
   private
@@ -108,12 +118,6 @@ module HasGuardedHandlers
       values += global_handlers[key]
     end
     values
-  end
-
-  def call_handler(handler, guards, event) # :nodoc:
-    return if guarded?(guards, event)
-    handler.call event
-    true
   end
 
   def new_handler_id # :nodoc:
