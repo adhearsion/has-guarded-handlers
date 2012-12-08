@@ -88,7 +88,7 @@ module HasGuardedHandlers
           if guarded?(guards, event)
             called = false
           else
-            call_handler handler, event
+            call_handler handler, guards, event
             true
           end
         end
@@ -101,7 +101,7 @@ module HasGuardedHandlers
 
   private
 
-  def call_handler(handler, event)
+  def call_handler(handler, guards, event)
     handler.call event
   end
 
