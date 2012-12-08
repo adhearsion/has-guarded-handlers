@@ -1,5 +1,8 @@
 # [develop](https://github.com/adhearsion/has-guarded-handlers)
 
+# [1.5.0](https://github.com/adhearsion/has-guarded-handlers/compare/v1.4.2...v1.5.0) - [2012-12-08](https://rubygems.org/gems/has-guarded-handlers/versions/1.5.0)
+  * Bugfix: Correct API preservation from previous release
+
 # [1.4.2](https://github.com/adhearsion/has-guarded-handlers/compare/v1.4.1...v1.4.2) - [2012-12-08](https://rubygems.org/gems/has-guarded-handlers/versions/1.4.2)
   * Bugfix: Preserve the old 'API' by which handlers were called
 
