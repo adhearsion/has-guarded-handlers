@@ -25,16 +25,21 @@ describe HasGuardedHandlers do
   end
 
   it 'can register a one-shot (tmp) handler' do
-    response.expects(:call).once.with(event)
-    event.expects(:foo).once.returns :bar
+    response.expects(:call).times(3).with(event)
+    event.expects(:foo).times(3).returns :bar
 
     nomatch_event = mock 'Event(nomatch)'
-    nomatch_event.expects(:foo).once.returns :baz
+    nomatch_event.expects(:foo).twice.returns :baz
 
+    subject.register_handler(:event, :foo => :bar) do |e|
+      response.call e
+      throw :pass
+    end
     subject.register_tmp_handler(:event, :foo => :bar) { |e| response.call e }
 
-    subject.trigger_handler :event, nomatch_event
-    subject.trigger_handler :event, event
+    subject.trigger_handler(:event, nomatch_event).should be_false
+    subject.trigger_handler(:event, event).should be_true
+    subject.trigger_handler(:event, event).should be_true
   end
 
   it 'can unregister a handler after registration' do
@@ -60,7 +65,7 @@ describe HasGuardedHandlers do
       throw :halt
       response.fail
     end
-    subject.trigger_handler :event, event
+    subject.trigger_handler(:event, event).should be_true
   end
 
   it 'allows for passing to the next handler of the same type' do
@@ -75,7 +80,20 @@ describe HasGuardedHandlers do
     subject.register_handler :event do |_|
       response.handle2
     end
-    subject.trigger_handler :event, event
+    subject.trigger_handler(:event, event).should be_true
+  end
+
+  context 'when there is nothing to pass to' do
+    it 'correctly indicates that a handler was called' do
+      response.expects(:handle1).once
+      response.expects(:fail).never
+      subject.register_handler :event do |_|
+        response.handle1
+        throw :pass
+        response.fail
+      end
+      subject.trigger_handler(:event, event).should be_true
+    end
   end
 
   describe 'when registering handlers with the same priority' do
