@@ -1,4 +1,6 @@
 # [develop](https://github.com/adhearsion/has-guarded-handlers)
+
+# [1.4.1](https://github.com/adhearsion/has-guarded-handlers/compare/v1.4.0...v1.4.1) - [2012-12-08](https://rubygems.org/gems/has-guarded-handlers/versions/1.4.1)
   * Bugfix: Report handler execution correctly in edge cases
 
 # [1.4.0](https://github.com/adhearsion/has-guarded-handlers/compare/v1.3.1...v1.4.0) - [2012-12-08](https://rubygems.org/gems/has-guarded-handlers/versions/1.4.0)
