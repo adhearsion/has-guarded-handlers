@@ -93,6 +93,48 @@ describe HasGuardedHandlers do
         expect { subject.trigger_handler(:event, event) }.to raise_error(StandardError, "Oops")
       end
     end
+
+    context "when broadcast mode is enabled on trigger" do
+      it "continues regardless of return value" do
+        response.should_receive(:handle).twice
+        subject.register_handler :event do |_|
+          response.handle
+        end
+        subject.register_handler :event do |_|
+          response.handle
+        end
+        subject.trigger_handler(:event, event, broadcast: true).should be_true
+      end
+
+      context "and an early one raises" do
+        it "swallows that exception, and executes later handlers" do
+          response.should_receive(:handle).once
+          subject.register_handler :event do |_|
+            raise "Oops"
+          end
+          subject.register_handler :event do |_|
+            response.handle
+          end
+          subject.trigger_handler(:event, event, broadcast: true)
+        end
+
+        it "can invoke a callback on an exception" do
+          exception_callback = double 'Exception Callback'
+          exception_callback.should_receive(:call).once.with do |e|
+            e.should be_a(RuntimeError)
+            e.message.should == "Oops"
+          end.ordered
+          response.should_receive(:handle).once.ordered
+          subject.register_handler :event do |_|
+            raise "Oops"
+          end
+          subject.register_handler :event do |_|
+            response.handle
+          end
+          subject.trigger_handler(:event, event, broadcast: true, exception_callback: exception_callback)
+        end
+      end
+    end
   end
 
   it 'allows for passing to the next handler of the same type' do

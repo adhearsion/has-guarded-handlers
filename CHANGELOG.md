@@ -1,4 +1,5 @@
 # [develop](https://github.com/adhearsion/has-guarded-handlers)
+  * Feature: Add a broadcast mode to handler triggering, which ignores what happens in handlers (return value and exceptions) and unconditionally continues the handler chain.
 
 # [1.5.0](https://github.com/adhearsion/has-guarded-handlers/compare/v1.4.2...v1.5.0) - [2012-12-08](https://rubygems.org/gems/has-guarded-handlers/versions/1.5.0)
   * Bugfix: Correct API preservation from previous release
