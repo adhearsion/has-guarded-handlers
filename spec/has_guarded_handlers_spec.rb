@@ -80,6 +80,19 @@ describe HasGuardedHandlers do
       end
       subject.trigger_handler(:event, event).should be_true
     end
+
+    context "and an early one raises" do
+      it "raises that exception, and does not execute later handlers" do
+        response.should_receive(:handle).never
+        subject.register_handler :event do |_|
+          raise "Oops"
+        end
+        subject.register_handler :event do |_|
+          response.handle
+        end
+        expect { subject.trigger_handler(:event, event) }.to raise_error(StandardError, "Oops")
+      end
+    end
   end
 
   it 'allows for passing to the next handler of the same type' do
