@@ -7,8 +7,8 @@ describe HasGuardedHandlers do
     end
   end
 
-  let(:event) { mock 'Event' }
-  let(:response) { mock 'Response' }
+  let(:event) { double 'Event' }
+  let(:response) { double 'Response' }
 
   it 'can register a handler' do
     response.should_receive(:call).twice.with(event)
@@ -28,7 +28,7 @@ describe HasGuardedHandlers do
     response.should_receive(:call).exactly(3).times.with(event)
     event.should_receive(:foo).exactly(3).times.and_return :bar
 
-    nomatch_event = mock 'Event(nomatch)'
+    nomatch_event = double 'Event(nomatch)'
     nomatch_event.should_receive(:foo).twice.and_return :baz
 
     subject.register_handler(:event, :foo => :bar) do |e|
@@ -244,15 +244,15 @@ describe HasGuardedHandlers do
       response.should_receive(:call).twice
       subject.register_handler(:event, :type => [:result, :error]) { |_| response.call }
 
-      event = mock 'Event'
+      event = double 'Event'
       event.should_receive(:type).at_least(1).and_return :result
       subject.trigger_handler :event, event
 
-      event = mock 'Event'
+      event = double 'Event'
       event.should_receive(:type).at_least(1).and_return :error
       subject.trigger_handler :event, event
 
-      event = mock 'Event'
+      event = double 'Event'
       event.should_receive(:type).at_least(1).and_return :get
       subject.trigger_handler :event, event
     end
@@ -261,12 +261,12 @@ describe HasGuardedHandlers do
       response.should_receive(:call).once
       subject.register_handler(:event, :type => :get, :body => 'test') { |_| response.call }
 
-      event = mock 'Event'
+      event = double 'Event'
       event.should_receive(:type).at_least(1).and_return :get
       event.should_receive(:body).and_return 'test'
       subject.trigger_handler :event, event
 
-      event = mock 'Event'
+      event = double 'Event'
       event.should_receive(:type).at_least(1).and_return :set
       event.should_receive(:body).never
       subject.trigger_handler :event, event
@@ -276,12 +276,12 @@ describe HasGuardedHandlers do
       response.should_receive(:call).twice
       subject.register_handler(:event, [{:type => :get}, {:body => 'test'}]) { |_| response.call }
 
-      event = mock 'Event'
+      event = double 'Event'
       event.should_receive(:type).at_least(1).and_return :set
       event.should_receive(:body).and_return 'test'
       subject.trigger_handler :event, event
 
-      event = mock 'Event'
+      event = double 'Event'
       event.should_receive(:type).at_least(1).and_return :get
       event.should_receive(:body).never
       subject.trigger_handler :event, event
