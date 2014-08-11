@@ -1,4 +1,12 @@
 # HasGuardedHandlers
+
+[![Gem Version](https://badge.fury.io/rb/has-guarded-handlers.png)](https://rubygems.org/gems/has-guarded-handlers)
+[![Build Status](https://secure.travis-ci.org/adhearsion/has-guarded-handlers.png?branch=develop)](http://travis-ci.org/adhearsion/has-guarded-handlers)
+[![Dependency Status](https://gemnasium.com/adhearsion/has-guarded-handlers.png?travis)](https://gemnasium.com/adhearsion/has-guarded-handlers)
+[![Code Climate](https://codeclimate.com/github/adhearsion/has-guarded-handlers.png)](https://codeclimate.com/github/adhearsion/has-guarded-handlers)
+[![Coverage Status](https://coveralls.io/repos/adhearsion/has-guarded-handlers/badge.png?branch=develop)](https://coveralls.io/r/adhearsion/has-guarded-handlers)
+[![Inline docs](http://inch-ci.org/github/adhearsion/has-guarded-handlers.png?branch=develop)](http://inch-ci.org/github/adhearsion/has-guarded-handlers)
+
 HasGuardedHandlers allows an object's API to provide flexible handler registration, storage and matching to arbitrary events.
 
 ## Installation
