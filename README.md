@@ -1,4 +1,12 @@
 # HasGuardedHandlers
+
+[![Gem Version](https://badge.fury.io/rb/has-guarded-handlers.png)](https://rubygems.org/gems/has-guarded-handlers)
+[![Build Status](https://secure.travis-ci.org/adhearsion/has-guarded-handlers.png?branch=develop)](http://travis-ci.org/adhearsion/has-guarded-handlers)
+[![Dependency Status](https://gemnasium.com/adhearsion/has-guarded-handlers.png?travis)](https://gemnasium.com/adhearsion/has-guarded-handlers)
+[![Code Climate](https://codeclimate.com/github/adhearsion/has-guarded-handlers.png)](https://codeclimate.com/github/adhearsion/has-guarded-handlers)
+[![Coverage Status](https://coveralls.io/repos/adhearsion/has-guarded-handlers/badge.png?branch=develop)](https://coveralls.io/r/adhearsion/has-guarded-handlers)
+[![Inline docs](http://inch-ci.org/github/adhearsion/has-guarded-handlers.png?branch=develop)](http://inch-ci.org/github/adhearsion/has-guarded-handlers)
+
 HasGuardedHandlers allows an object's API to provide flexible handler registration, storage and matching to arbitrary events.
 
 ## Installation
@@ -78,12 +86,12 @@ a.register_handler_with_options(:event, {:tmp => true, :priority => 10}, :foo =>
 
 ### Handler chaining
 
-When multiple handlers match the event, the return value of each handler will determine if the handler chain continues. A truthy return value will cause the handler to swallow the event and halt the handler chain. A falsy return value will continue the chain.
+Each handler can control whether subsequent handlers should be executed by throwing `:pass` or `:halt`.
 
-It is possible to explicitly pass to the next handler by throwing `:pass` in your handler:
+To explicitly pass to the next handler, throw `:pass` in your handler:
 
 ```ruby
-a.register_handler(:event) { throw :pass }
+a.register_handler(:event) { do_stuff; throw :pass }
 a.register_handler(:event) { ... } # This will be executed
 
 a.trigger_handler :event, :foo
@@ -92,10 +100,28 @@ a.trigger_handler :event, :foo
 or indeed explicitly halt the handler chain by throwing `:halt` in the handler:
 
 ```ruby
-a.register_handler(:event) { throw :halt }
+a.register_handler(:event) { do_stuff; throw :halt }
 a.register_handler(:event) { ... } # This will not be executed
 
 a.trigger_handler :event, :foo
+```
+
+If nothing is thrown in the event handler, the handler chain will be halted by default, so subsequent handlers will not be executed.  
+
+```ruby
+a.register_handler(:event) { do_stuff; }
+a.register_handler(:event) { ... } # This will not be executed
+
+a.trigger_handler :event, :foo
+```
+
+By triggering the event in broadcast mode, the handler chain will continue by default.  
+
+```ruby
+a.register_handler(:event) { do_stuff; }
+a.register_handler(:event) { ... } # This will be executed
+
+a.trigger_handler :event, :foo, broadcast: true
 ```
 
 ### What are guards?
