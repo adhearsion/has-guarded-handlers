@@ -145,7 +145,7 @@ module HasGuardedHandlers
             true unless broadcast
           end
         end
-        delete_handler_if(type) { |_, h, _| h.equal? handler } if tmp && val
+        delete_handler_if(type) { |_, h, _| h.equal? handler } if tmp && called
         val
       end
     end

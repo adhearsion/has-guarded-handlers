@@ -1,4 +1,6 @@
 # [develop](https://github.com/adhearsion/has-guarded-handlers)
+  * Bugfix: Ensure temp handlers are executed only once.
+  * Improved documentation on how chained handlers execute via `throw :pass`, `throw :halt`, and not explicitly throwing.
 
 # [1.6.0](https://github.com/adhearsion/has-guarded-handlers/compare/v1.5.0...v1.6.0) - [2014-01-16](https://rubygems.org/gems/has-guarded-handlers/versions/1.6.0)
   * Feature: Add a broadcast mode to handler triggering, which ignores what happens in handlers (return value and exceptions) and unconditionally continues the handler chain.
