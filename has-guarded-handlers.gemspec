@@ -19,7 +19,7 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
 
   s.add_development_dependency 'bundler', ["~> 1.0"]
-  s.add_development_dependency 'rspec', [">= 2.5.0"]
+  s.add_development_dependency 'rspec', ["~> 3.0"]
   s.add_development_dependency 'yard', [">= 0.7.0"]
   s.add_development_dependency 'rake', [">= 0"]
   s.add_development_dependency 'guard-rspec'

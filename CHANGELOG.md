@@ -1,4 +1,5 @@
 # [develop](https://github.com/adhearsion/has-guarded-handlers)
+  * Bugfix: Fix release pipeline
 
 # [1.6.1](https://github.com/adhearsion/has-guarded-handlers/compare/v1.6.0...v1.6.1) - [2015-02-20](https://rubygems.org/gems/has-guarded-handlers/versions/1.6.1)
   * Bugfix: Ensure temp handlers are executed only once.
