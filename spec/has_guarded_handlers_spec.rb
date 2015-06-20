@@ -257,6 +257,16 @@ describe HasGuardedHandlers do
     subject.trigger_handler :event, event
   end
 
+  it 'can clear all handlers' do
+    expect(response).to receive(:call).once
+
+    subject.register_handler(:event) { |_| response.call }
+    subject.trigger_handler :event, event
+
+    subject.clear_handlers
+    subject.trigger_handler :event, event
+  end
+
   describe 'guards' do
     GuardMixin = Module.new
     class GuardedObject

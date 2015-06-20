@@ -112,7 +112,11 @@ module HasGuardedHandlers
   # @param [Symbol, nil] type remove filters for a specific handler
   # @param [guards] guards take a look at the guards documentation
   def clear_handlers(type = nil, *guards)
-    delete_handler_if(type) { |g, _| g == guards }
+    if type.nil?
+      @handlers = nil
+    else
+      delete_handler_if(type) { |g, _| g == guards }
+    end
   end
 
   # Trigger a handler classification with an event object
