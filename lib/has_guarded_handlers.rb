@@ -165,19 +165,23 @@ module HasGuardedHandlers
 
   def delete_handler_if(type, &block) # :nodoc:
     guarded_handlers[type].each_pair do |priority, handlers|
-      handlers.delete_if(&block)
+      handlers.delete_if(&block) # concurrent array mod!?!
     end
   end
 
   def handlers_of_type(type) # :nodoc:
     return unless hash = guarded_handlers[type]
     values = []
-    hash.keys.sort.reverse.each do |key|
-      values += hash[key]
+    keys = hash.keys; keys.sort!; keys.reverse!
+    keys.each do |key|
+      val = hash[key]
+      values.push *val unless val.nil?
     end
     global_handlers = guarded_handlers[nil]
-    global_handlers.keys.sort.reverse.each do |key|
-      values += global_handlers[key]
+    keys = global_handlers.keys; keys.sort!; keys.reverse!
+    keys.each do |key|
+      val = global_handlers[key]
+      values.push *val unless val.nil?
     end
     values
   end
