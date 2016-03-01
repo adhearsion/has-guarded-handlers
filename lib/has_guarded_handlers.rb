@@ -128,8 +128,8 @@ module HasGuardedHandlers
   # @option options [true, false] :broadcast Enables broadcast mode, where the return value or raising of handlers does not halt the handler chain. Defaults to false.
   # @option options [Proc] :exception_callback Allows handling exceptions when broadcast mode is available via a callback.
   def trigger_handler(type, event, options = {})
-    broadcast = options[:broadcast] || false
     return unless handler = handlers_of_type(type)
+    broadcast = options[:broadcast]
     called = false
     catch :halt do
       h = handler.find do |guards, handler, tmp|
@@ -154,7 +154,7 @@ module HasGuardedHandlers
         val
       end
     end
-    !!called
+    called
   end
 
   private
