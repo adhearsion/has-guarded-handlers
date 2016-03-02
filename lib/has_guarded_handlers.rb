@@ -135,7 +135,9 @@ module HasGuardedHandlers
       h = handler.find do |guards, handler, tmp|
         called = true
         val = catch(:pass) do
-          if guarded?(guards, event)
+          if guards.nil? # deleted while executing __method__
+            called = nil # very special case, nothing to call
+          elsif guarded?(guards, event)
             called = false
           else
             begin
