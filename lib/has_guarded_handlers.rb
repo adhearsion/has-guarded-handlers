@@ -167,25 +167,35 @@ module HasGuardedHandlers
 
   def delete_handler_if(type, &block) # :nodoc:
     guarded_handlers[type].each_pair do |priority, handlers|
-      handlers.delete_if(&block) # concurrent array mod!?!
+      handlers.delete_if(&block)
     end
   end
 
   def handlers_of_type(type) # :nodoc:
-    return unless hash = guarded_handlers[type]
+    return unless handlers = guarded_handlers[type]
     values = []
-    keys = hash.keys; keys.sort!; keys.reverse!
+    keys = handlers.keys; keys.sort!; keys.reverse!
     keys.each do |key|
-      val = hash[key]
-      values.push *val unless val.nil?
+      push_handler(handlers, key, values)
     end
     global_handlers = guarded_handlers[nil]
     keys = global_handlers.keys; keys.sort!; keys.reverse!
     keys.each do |key|
-      val = global_handlers[key]
-      values.push *val unless val.nil?
+      push_handler(global_handlers, key, values)
     end
     values
+  end
+
+  def push_handler(handlers, key, values)
+    return unless val = handlers[key] # Hash
+    begin
+      # to make sure on re-try elements are not added
+      # twice - attempt to copy _val_ to a new array:
+      val = [].push *val
+    rescue ConcurrencyError # re-read handler _val_
+      return push_handler(handlers, key, values)
+    end
+    values.push *val
   end
 
   def new_handler_id # :nodoc:
