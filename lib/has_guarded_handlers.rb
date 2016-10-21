@@ -192,10 +192,10 @@ module HasGuardedHandlers
       # to make sure on re-try elements are not added
       # twice - attempt to copy _val_ to a new array:
       val = [].push *val
+      values.push *val # only here to ease testing
     rescue ConcurrencyError # re-read handler _val_
       return push_handler(handlers, key, values)
     end
-    values.push *val
   end
 
   def new_handler_id # :nodoc:
