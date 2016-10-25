@@ -112,7 +112,8 @@ describe HasGuardedHandlers do
           super.tap do
             unless Thread.current[:__values_push_raised]
               Thread.current[:__values_push_raised] = true
-              raise ConcurrencyError.new('stub-ed concurrent mod emulation')
+              error = defined?(JRUBY_VERSION) ? ConcurrencyError : ThreadError
+              raise error.new('stub-ed concurrent mod emulation')
             end
           end
         end

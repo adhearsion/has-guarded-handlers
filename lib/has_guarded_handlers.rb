@@ -193,7 +193,7 @@ module HasGuardedHandlers
       # twice - attempt to copy _val_ to a new array:
       val = [].push *val
       values.push *val # only here to ease testing
-    rescue ConcurrencyError # re-read handler _val_
+    rescue ThreadError # ConcurrencyError on JRuby
       return push_handler(handlers, key, values)
     end
   end
