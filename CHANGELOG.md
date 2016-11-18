@@ -1,5 +1,6 @@
 # [develop](https://github.com/adhearsion/has-guarded-handlers)
   * use ThreadSafe::Cache instead of Hash for storing handlers (improved concurrency)
+  * Bugfix: recover from (concurrent) handler removal adhearsion/punchblock#234
 
 # [1.6.3](https://github.com/adhearsion/has-guarded-handlers/compare/v1.6.2...v1.6.3) - [2015-06-20](https://rubygems.org/gems/has-guarded-handlers/versions/1.6.3)
   * Bugfix: Clearing all handlers now works

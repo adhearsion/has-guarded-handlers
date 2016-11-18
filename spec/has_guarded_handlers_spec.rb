@@ -80,6 +80,49 @@ describe HasGuardedHandlers do
       expect(subject.trigger_handler(:event, second_event)).to be true
       expect(subject.trigger_handler(:event, second_event)).to be false
     end
+
+    it 'recovers from concurrent modification as tmp handler is being removed' do
+      event = Object.new; def event.foo; :bar end
+      tmp_response = double '(tmp) Response'
+      expect(tmp_response).to receive(:call).exactly(1).times.with(event)
+      expect(response).to receive(:call).exactly(1).times.with(event)
+
+      require 'thread'; queue = Queue.new
+
+      subject.register_tmp_handler(:event, :foo => :bar) do |e|
+        tmp_response.call e; queue.pop
+      end
+
+      subject.register_handler(:event) do |e|
+         response.call e
+      end
+
+      Thread.new do
+        expect( subject.trigger_handler(:event, event) ).to be true
+      end
+
+      sleep 0.001 while queue.num_waiting == 0 # thread to end up in tmp handler
+
+      orig_method = subject.method(:push_handler)
+      subject.stub(:push_handler) do |handlers, key, values|
+        queue << :done; sleep 0.01 # let tmp handler finish-up
+        # we can not stub *val in any way thus we assume values.push
+        # is in the same begin - rescue block ...
+        def values.push(*args)
+          super.tap do
+            unless Thread.current[:__values_push_raised]
+              Thread.current[:__values_push_raised] = true
+              error = defined?(JRUBY_VERSION) ? ConcurrencyError : ThreadError
+              raise error.new('stub-ed concurrent mod emulation')
+            end
+          end
+        end
+        orig_method.call(handlers, key, values)
+      end
+
+      expect( subject.trigger_handler(:event, event) ).to be true
+    end
+
   end
 
   it 'can unregister a handler after registration' do
