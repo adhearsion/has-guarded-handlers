@@ -1,6 +1,6 @@
 require "has_guarded_handlers/version"
 require 'securerandom'
-require 'thread_safe'
+require 'concurrent/map'
 
 #
 # HasGuardedHandlers allows an object's API to provide flexible handler registration, storage and matching to arbitrary events.
@@ -234,8 +234,8 @@ module HasGuardedHandlers
   end
 
   def guarded_handlers
-    @handlers ||= ThreadSafe::Cache.new do |handlers, key|
-      handlers.fetch_or_store(key, ThreadSafe::Cache.new { |h, k| h.fetch_or_store(k, []) })
+    @handlers ||= Concurrent::Map.new do |handlers, key|
+      handlers.fetch_or_store(key, Concurrent::Map.new { |h, k| h.fetch_or_store(k, []) })
     end
   end
 
