@@ -6,6 +6,11 @@ rvm:
   - jruby-9.1.5.0
   - rbx-2.1.1
   - ruby-head
+jdk:
+  - openjdk8 # for jruby
+before_install:
+  - rvm @global @default do gem uninstall bundler -a -x --silent || true
+  - gem install bundler -v '<2'
 matrix:
   allow_failures:
     - rvm: rbx-2.1.1
