@@ -1,14 +1,20 @@
 language: ruby
 rvm:
   - 1.9.3
-  - 2.2.5
-  - jruby-1.7.25
-  - jruby-9.1.5.0
-  - rbx-2.1.1
+  - 2.2.9
+  - 2.3.8
+  - 2.4.5
+  - 2.5.3
+  - jruby-1.7.27
+  - jruby-9.1.17.0
+  - jruby-9.2.5.0
   - ruby-head
+jdk:
+  - openjdk8 # for jruby
+before_install:
+  - gem install bundler || gem install bundler --version '<2'
 matrix:
   allow_failures:
-    - rvm: rbx-2.1.1
     - rvm: ruby-head
 notifications:
   irc: "irc.freenode.org#adhearsion"
