@@ -125,6 +125,55 @@ describe HasGuardedHandlers do
 
   end
 
+  it 'allows handlers of same type to be added/removed concurrently' do
+    %w( concurrent/array concurrent/atomic/atomic_fixnum).each { |p| require p }
+    Thread.abort_on_exception = true
+
+    Event = Class.new do
+      attr_reader :track, :count
+      def initialize(c = 0)
+        @count = Concurrent::AtomicFixnum.new(c)
+        @track = Concurrent::AtomicFixnum.new
+      end
+      def inc_track; @track.increment > 0 end
+      def cmp_count(i); @count.increment >= i end
+      def dec_count; @count.decrement end
+    end
+
+    event = Event.new
+
+    subject.register_handler :ami, [{ [:inc_track] => true }] do |e|
+      sleep(0)
+    end
+    expect( subject.send(:guarded_handlers)[:ami][0].size ).to eql 1
+
+    handler_id = subject.register_handler(:ami, [ [:nil?] ]) { |_| }
+    expect( subject.send(:guarded_handlers)[:ami][0].size ).to eql 2
+
+    tmp_handler_count = 3000; threads = Concurrent::Array.new
+    tmp_handler_count.times do |i| # enough to reproduce concurrent regiter/unregister
+      threads << Thread.new do
+        h_id = subject.register_tmp_handler(:ami, [{ [:cmp_count, i] => true }]) do |e|
+          e.dec_count
+        end
+        threads << Thread.new do
+          subject.unregister_handler(:ami, h_id)
+        end
+        subject.trigger_handler(:ami, event)
+      end
+    end
+    sleep(1.0)
+    threads.each(&:join)
+
+    expect( subject.trigger_handler(:ami, event) ).to be true
+    expect( subject.send(:guarded_handlers)[:ami][0].size ).to eql 2
+
+    expect( event.track.value ).to eql tmp_handler_count + 1
+
+    subject.unregister_handler(:ami, handler_id)
+    expect( subject.send(:guarded_handlers)[:ami][0].size ).to eql 1
+  end
+
   it 'can unregister a handler after registration' do
     expect(response).to receive(:call).once.with(event)
     subject.register_handler(:event) { |e| response.call e }

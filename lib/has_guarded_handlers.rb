@@ -1,6 +1,6 @@
 require "has_guarded_handlers/version"
 require 'securerandom'
-require 'thread_safe'
+require 'concurrent/map'
 
 #
 # HasGuardedHandlers allows an object's API to provide flexible handler registration, storage and matching to arbitrary events.
@@ -94,10 +94,8 @@ module HasGuardedHandlers
   # @return [String] handler ID for later manipulation
   def register_handler_with_options(type = nil, options = {}, *guards, &handler)
     check_guards guards
-    options[:priority] ||= 0
-    new_handler_id.tap do |handler_id|
-      guarded_handlers[type][options[:priority]] << [guards, handler, options[:tmp], handler_id]
-    end
+    priority = (options[:priority] ||= 0)
+    do_register_handler(type, new_handler_id, priority, guards, handler, options[:tmp])
   end
 
   # Unregister a handler by ID
@@ -165,10 +163,30 @@ module HasGuardedHandlers
     handler.call event
   end
 
-  def delete_handler_if(type, &block) # :nodoc:
-    guarded_handlers[type].each_pair do |priority, handlers|
-      handlers.delete_if(&block)
+  def do_register_handler(type, handler_id, priority, guards, handler, tmp)
+    handlers_map = guarded_handlers[type]
+    tuples = handlers_map[priority]
+    new_tuples = (tuples.dup << [guards, handler, tmp, handler_id])
+    unless handlers_map.replace_pair(priority, tuples, new_tuples)
+      # try again, some one concurrently registered another handler
+      do_register_handler(type, handler_id, priority, guards, handler, tmp)
     end
+    handler_id
+  end
+
+  def delete_handler_if(type, &block) # :nodoc:
+    handlers_map = guarded_handlers[type]
+    ret = handlers_map.each_pair do |priority, tuples|
+      new_tuples = tuples.dup
+      cur_size = new_tuples.size
+      new_tuples.delete_if(&block)
+      if cur_size != new_tuples.size
+        break unless handlers_map.replace_pair(priority, tuples, new_tuples)
+      end
+    end
+    # if broke out of loop, try again (no changes made)
+    return delete_handler_if(type, &block) if ret.nil?
+    true
   end
 
   def handlers_of_type(type) # :nodoc:
@@ -250,8 +268,8 @@ module HasGuardedHandlers
   end
 
   def guarded_handlers
-    @handlers ||= ThreadSafe::Cache.new do |handlers, key|
-      handlers.fetch_or_store(key, ThreadSafe::Cache.new { |h, k| h.fetch_or_store(k, []) })
+    @handlers ||= Concurrent::Map.new do |handlers, key|
+      handlers.fetch_or_store(key, Concurrent::Map.new { |h, k| h.fetch_or_store(k, []) })
     end
   end
 
